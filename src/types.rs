@@ -33,16 +33,14 @@ impl Server {
 
     pub fn send_response(&self){
         for mut stream in &self.streams {
-            stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nHello");
+            let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nHello");
         }
     }
     
     
     pub fn close_connection_stream(&self, stream_to_close: &TcpStream){
-        for stream in &self.streams {
-            if stream.as_raw_socket() == stream_to_close.as_raw_socket() {
-                stream.shutdown(Shutdown::Both).expect("shutdown call failed");
-            }
+        if self.streams.iter().any(|i| i.as_raw_socket() == stream_to_close.as_raw_socket()) {
+            stream_to_close.shutdown(Shutdown::Both).expect("shutdown call failed");
         }
     }
 }
